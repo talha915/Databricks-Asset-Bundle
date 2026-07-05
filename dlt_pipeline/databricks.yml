@@ -5,8 +5,8 @@ bundle:
   uuid: 06aaa2ed-25f2-4c63-8240-7776dc2c4848
 
 include:
-  # - resources/*.yml
-  - resources/pipelines/bronze_pipeline.yml
+  - resources/*.yml
+  # - resources/pipelines/bronze_pipeline.yml
 
 artifacts:
   python_artifact:
