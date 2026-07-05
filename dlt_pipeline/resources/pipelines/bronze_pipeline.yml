@@ -1,0 +1,10 @@
+resources:
+  pipelines:
+    bronze_pipeline:
+      name: bronze_pipeline
+      catalog: ai_lab_demo
+      schema: bronze
+      continuous: false
+      libraries:
+        - notebook:
+            path: ../notebooks/bronze.ipynb
