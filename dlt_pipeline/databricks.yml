@@ -5,7 +5,8 @@ bundle:
   uuid: 06aaa2ed-25f2-4c63-8240-7776dc2c4848
 
 include:
-  - resources/*.yml
+  # - resources/*.yml
+  - resources/pipelines/bronze_pipeline.yml
 
 artifacts:
   python_artifact:
@@ -30,7 +31,7 @@ targets:
     workspace:
       host: https://dbc-e2cc7ffb-3f21.cloud.databricks.com
     variables:
-      catalog: ai_lab
+      catalog: ai_lab_demo
       schema: ${workspace.current_user.short_name}
   prod:
     mode: production
@@ -39,7 +40,7 @@ targets:
       # We explicitly deploy to /Workspace/Users/tz915426@gmail.com to make sure we only have a single copy.
       root_path: /Workspace/Users/tz915426@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
-      catalog: ai_lab
+      catalog: ai_lab_demo
       schema: prod
     permissions:
       - user_name: tz915426@gmail.com
