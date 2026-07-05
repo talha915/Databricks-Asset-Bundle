@@ -1,7 +1,7 @@
 import dlt
 
 from src.common.config import (
-    source_file_map,
+    erp_folder,
     bronze_check_path
 )
 
@@ -10,22 +10,22 @@ from src.services.ingestion_service import (
 )
 
 
-class CRMBronze:
+class ERPBronze:
 
     def register(self):
 
 
         @dlt.table(
-            name="bronze_crm_customer"
+            name="bronze_erp"
         )
-        def bronze_crm_customer():
+        def bronze_erp():
 
             return (
                 IngestionService
                 .read_csv_autoloader(
-                    source_file_map["crm_cust_info"],
+                    erp_folder,
                     bronze_check_path[
-                        "schema_checkpoint_path"
-                    ] + "/crm_customer"
+                        "schema_location"
+                    ] + "/bronze_erp"
                 )
             )
