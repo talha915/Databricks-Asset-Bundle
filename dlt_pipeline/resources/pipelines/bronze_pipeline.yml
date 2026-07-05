@@ -1,10 +1,14 @@
 resources:
   pipelines:
     bronze_pipeline:
+
       name: bronze_pipeline
+
       catalog: ai_lab_demo
       schema: bronze
+      serverless: true
       continuous: false
+
       libraries:
         - notebook:
-            path: ../notebooks/bronze.ipynb
+            path: ../../src/notebooks/bronze.ipynb
