@@ -4,7 +4,6 @@ bundle:
 include:
   - resources/**/*.yml
 
-
 targets:
   dev:
     mode: development
@@ -12,9 +11,9 @@ targets:
     workspace:
       host: https://dbc-e2cc7ffb-3f21.cloud.databricks.com
 
-
   prod:
     mode: production
     workspace:
       host: https://dbc-e2cc7ffb-3f21.cloud.databricks.com
       root_path: /Workspace/Users/tz915426@gmail.com/.bundle/${bundle.name}/${bundle.target}
+      
