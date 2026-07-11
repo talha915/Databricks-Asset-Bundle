@@ -13,8 +13,6 @@ from src.services.ingestion_service import (
 class CRMBronze:
 
     def register(self):
-
-
         @dlt.table(
             name="bronze_crm"
         )
