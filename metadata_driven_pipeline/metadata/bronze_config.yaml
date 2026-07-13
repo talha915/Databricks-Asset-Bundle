@@ -1,0 +1,13 @@
+source:
+  path: "/Volumes/ai_lab_demo/source/source_volume/product_catalog/"
+  format: "csv"
+
+
+target:
+  database: "ai_lab_demo.bronze"
+  table: "product_catalog"
+
+
+options:
+  header: true
+  inferSchema: true

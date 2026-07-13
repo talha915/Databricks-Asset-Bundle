@@ -1,0 +1,21 @@
+source:
+  table: "silver.orders_clean"
+
+
+target:
+  database: "gold"
+  table: "customer_sales"
+
+
+aggregation:
+
+  group_by:
+    - customer_id
+    - customer_name
+
+
+metrics:
+
+  - column: "amount"
+    function: "sum"
+    alias: "total_sales"

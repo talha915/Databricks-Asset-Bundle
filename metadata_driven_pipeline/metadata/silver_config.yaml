@@ -1,0 +1,16 @@
+source:
+  table: "ai_lab_demo.bronze.product_catalog"
+
+
+target:
+  database: "ai_lab_demo.silver"
+  table: "product_catalog"
+
+
+cleaning_rules:
+
+  - column: "product_name"
+    action: "trim"
+
+  - column: "category"
+    action: "lower"
