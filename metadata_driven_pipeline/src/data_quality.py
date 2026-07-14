@@ -24,21 +24,15 @@ def check_not_null(df,column):
     }
 
 
-
 def check_positive(df,column):
 
     bad=df.filter(
         col(column)<=0
     ).count()
 
-
     return {
-
         "column":column,
-
         "failed_records":bad,
-
         "status":
         "FAILED" if bad>0 else "PASSED"
-
     }
