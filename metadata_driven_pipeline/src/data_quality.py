@@ -11,16 +11,10 @@ def check_not_null(df,column):
 
 
     return {
-
         "column":column,
-
         "total_records":total,
-
         "failed_records":bad,
-
-        "status":
-        "FAILED" if bad>0 else "PASSED"
-
+        "status": "FAILED" if bad > 0 else "PASSED"
     }
 
 
