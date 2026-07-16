@@ -9,7 +9,6 @@ def check_not_null(df,column):
         col(column).isNull()
     ).count()
 
-
     return {
         "column":column,
         "total_records":total,
