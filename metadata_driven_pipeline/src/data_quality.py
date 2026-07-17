@@ -2,7 +2,9 @@ from pyspark.sql.functions import col
 
 
 def check_not_null(df,column):
-
+    """
+    Checking not null
+    """
     total=df.count()
 
     bad=df.filter(
