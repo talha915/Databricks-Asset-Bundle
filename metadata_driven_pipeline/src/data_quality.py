@@ -20,7 +20,9 @@ def check_not_null(df,column):
 
 
 def check_positive(df,column):
-
+    """
+    check positive
+    """
     bad=df.filter(
         col(column)<=0
     ).count()
