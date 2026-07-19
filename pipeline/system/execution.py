@@ -8,7 +8,7 @@ def start_run(layer, job_name):
     run_id = int(datetime.now().timestamp())
 
     spark.sql(f"""
-    INSERT INTO execution_logs
+    INSERT INTO ai_lab_demo.system.execution_log
     VALUES(
         {run_id},
         '{layer}',
@@ -28,7 +28,7 @@ def start_run(layer, job_name):
 def end_run(run_id, status, records=0, error=None):
 
     spark.sql(f"""
-    UPDATE execution_logs
+    UPDATE ai_lab_demo.system.execution_log
 
     SET
     status='{status}',

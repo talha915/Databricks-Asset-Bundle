@@ -6,7 +6,7 @@ def write_audit(run_id,event,message):
 
     spark.sql(f"""
 
-    INSERT INTO audit_log
+    INSERT INTO ai_lab_demo.system.audit_log
 
     VALUES(
     uuid(),
