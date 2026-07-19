@@ -1,4 +1,5 @@
 BRONZE_DB = "bronze"
+CATALOG = "ai_lab_demo"
 
 VOLUME_PATH = "/Volumes/ai_lab_demo/dataset/ai_lab_demo_src"
 
