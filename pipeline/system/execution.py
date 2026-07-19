@@ -1,5 +1,7 @@
 from datetime import datetime
+from framework.utils import get_spark
 
+spark = get_spark()
 
 def start_run(layer, job_name):
 
