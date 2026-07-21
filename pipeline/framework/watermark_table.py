@@ -4,12 +4,13 @@ from datetime import datetime
 
 spark = get_spark()
 
-def get_latest_watermark(pipeline_name):
+def get_latest_watermark(pipeline_name, pipeline_destination):
 
     result = spark.sql(f"""
         SELECT last_value
         FROM ai_lab_demo.system.watermark
         WHERE pipeline_name = '{pipeline_name}'
+        AND pipeline_destination = '{pipeline_destination}'
         ORDER BY updated_at DESC
         LIMIT 1
     """).collect()
