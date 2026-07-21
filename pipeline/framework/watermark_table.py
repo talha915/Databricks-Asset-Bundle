@@ -4,7 +4,10 @@ from datetime import datetime
 
 spark = get_spark()
 
-def get_latest_watermark(pipeline_name, pipeline_destination):
+def get_latest_watermark(
+    pipeline_name: str, 
+    pipeline_destination: str
+) -> str:
 
     result = spark.sql(f"""
         SELECT last_value
@@ -22,9 +25,9 @@ def get_latest_watermark(pipeline_name, pipeline_destination):
 
 
 def update_watermark(
-    pipeline_name, 
-    pipeline_src, 
-    pipeline_destination, 
+    pipeline_name 
+    pipeline_src 
+    pipeline_destination 
     last_value
 ):
     """
