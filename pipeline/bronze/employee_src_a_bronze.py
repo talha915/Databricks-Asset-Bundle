@@ -1,4 +1,4 @@
-from framework.config import CATALOG, BRONZE_DB, departments
+from framework.config import CATALOG, BRONZE_DB, employees_src_a, employees_src_b, employees_src_c
 from framework.utils import get_spark
 from pyspark.sql.functions import col
 
@@ -10,15 +10,15 @@ def run():
     # Checkpoint Path
     checkpoint_path = (
         f"/Volumes/{CATALOG}/{BRONZE_DB}/"
-        "pipeline_checkpoints/employees"
+        "pipeline_checkpoints/employees_src_a"
     )
 
     schema_path = (
         f"/Volumes/{CATALOG}/{BRONZE_DB}/"
-        "schema/employees"
+        "schema/employees_src_a"
     )
 
-    df = (
+    df_emp_src_a = (
         spark.readStream
         .format("cloudFiles")
         .option("cloudFiles.format", "csv")
@@ -31,10 +31,10 @@ def run():
              "addNewColumns"
          )
         .option("header", "true")
-        .load(departments)
+        .load(employees_src_a)
     )
 
-    df = df.select(
+    df = df_emp_src_a.select(
         "*",
         col("_metadata.file_path").alias("file_path")
     )
@@ -47,7 +47,7 @@ def run():
           .option("mergeSchema", "true")
           .trigger(availableNow=True)
           .toTable(
-              f"{CATALOG}.{BRONZE_DB}.department"
+              f"{CATALOG}.{BRONZE_DB}.employees_src_a"
           )
     )
 
