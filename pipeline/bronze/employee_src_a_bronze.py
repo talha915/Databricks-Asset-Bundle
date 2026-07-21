@@ -1,4 +1,4 @@
-from framework.config import CATALOG, BRONZE_DB, employees_src_a, employees_src_b, employees_src_c
+from framework.config import CATALOG, BRONZE_DB, employees_src_a
 from framework.utils import get_spark
 from pyspark.sql.functions import col
 

@@ -1,4 +1,4 @@
-from framework.config import CATALOG, BRONZE_DB, employees_src_b, employees_src_c
+from framework.config import CATALOG, BRONZE_DB, employees_src_b
 from framework.utils import get_spark
 from pyspark.sql.functions import col
 
@@ -18,10 +18,10 @@ def run():
         "schema/employees_src_b"
     )
 
-    df_emp_src_b = (
+    df_emp_src_a = (
         spark.readStream
         .format("cloudFiles")
-        .option("cloudFiles.format", "csv")
+        .option("cloudFiles.format", "json")
         .option(
              "cloudFiles.schemaLocation",
              schema_path
@@ -30,11 +30,11 @@ def run():
              "cloudFiles.schemaEvolutionMode",
              "addNewColumns"
          )
-        .option("header", "true")
+        .option("multiLine", "true")
         .load(employees_src_b)
     )
 
-    df = df_emp_src_b.select(
+    df = df_emp_src_a.select(
         "*",
         col("_metadata.file_path").alias("file_path")
     )
@@ -47,7 +47,7 @@ def run():
           .option("mergeSchema", "true")
           .trigger(availableNow=True)
           .toTable(
-              f"{CATALOG}.{BRONZE_DB}.employees"
+              f"{CATALOG}.{BRONZE_DB}.employees_src_b"
           )
     )
 
