@@ -1,6 +1,7 @@
 from framework.config import CATALOG, BRONZE_DB, departments
 from framework.utils import get_spark
 from pyspark.sql.functions import col
+import pyspark.sql.functions as F
 
 spark = get_spark()
 
@@ -34,9 +35,10 @@ def run():
         .load(departments)
     )
 
-    df = df.select(
-        "*",
-        col("_metadata.file_path").alias("file_path")
+    df = (
+        df
+        .select("*",col("_metadata.file_path").alias("file_path"))
+        .withColumn("ingestion_time", F.current_timestamp())
     )
 
 

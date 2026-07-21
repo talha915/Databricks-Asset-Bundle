@@ -1,4 +1,4 @@
-from utils import get_spark
+from framework.utils import get_spark
 import pyspark.sql.functions as F
 from datetime import datetime
 
@@ -10,7 +10,7 @@ def get_latest_watermark(
 ) -> str:
 
     result = spark.sql(f"""
-        SELECT last_value
+        SELECT ingestion_time
         FROM ai_lab_demo.system.watermark
         WHERE pipeline_name = '{pipeline_name}'
         AND pipeline_destination = '{pipeline_destination}'
@@ -25,10 +25,10 @@ def get_latest_watermark(
 
 
 def update_watermark(
-    pipeline_name 
-    pipeline_src 
-    pipeline_destination 
-    last_value
+    pipeline_name, 
+    pipeline_src,
+    pipeline_destination, 
+    ingestion_time
 ):
     """
     Updating the watermark in the table
@@ -42,13 +42,13 @@ def update_watermark(
         )
     )
 
-    if df_filter.count() == 0:
+    if df_filter.isEmpty():
         data = [
             (
                 pipeline_name,
                 pipeline_src,
                 pipeline_destination,
-                last_value,
+                ingestion_time,
                 datetime.now()
             )
         ]
@@ -59,7 +59,7 @@ def update_watermark(
                 "pipeline_name",
                 "pipeline_src",
                 "pipeline_destination",
-                "last_value",
+                "ingestion_time",
                 "updated_at"
             ]
         )
@@ -69,7 +69,7 @@ def update_watermark(
         spark.sql(f"""
             UPDATE ai_lab_demo.system.watermark
             SET
-                last_value = '{last_value}',
+                ingestion_time = '{ingestion_time}',
                 updated_at = current_timestamp()
             WHERE pipeline_name = '{pipeline_name}' and pipeline_destination = '{pipeline_destination}'
         """)
