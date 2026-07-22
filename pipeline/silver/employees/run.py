@@ -41,7 +41,7 @@ def run():
     )
 
     if max_ingestion_time is None:
-        unprocessed_df = df_bronze
+        
         max_ingestion_time_a = (
             df_emp_src_a
             .select(F.max("ingestion_time"))
@@ -59,12 +59,14 @@ def run():
         )
 
         max_ingestion_time = max(max_ingestion_time_a, max_ingestion_time_b, max_ingestion_time_c)
-        
-    else:
+        unprocessed_df_emp_a, unprocessed_df_emp_b, unprocessed_df_emp_c = df_emp_src_a, df_emp_src_b, df_emp_src_c
+    else:    
         # Unprocessed bronze rows
         unprocessed_df_emp_a, unprocessed_df_emp_b, unprocessed_df_emp_c = get_unprocessed_bronze_df(df_emp_src_a, df_emp_src_b, df_emp_src_c, max_ingestion_time)
 
     df_transform = transform(unprocessed_df_emp_a, unprocessed_df_emp_b, unprocessed_df_emp_c)
+
+    df_transform.count()
 
     if not spark.catalog.tableExists(f"{CATALOG}.{SILVER_DB}.silver_employee"):
         df_transform.write.mode("append").saveAsTable(f"{CATALOG}.{SILVER_DB}.silver_employee")
@@ -76,14 +78,14 @@ def run():
             df_dedup
             .write
             .mode("append")
-            .insertInto(f"{CATALOG}.{SILVER_DB}.silver_employees")
+            .insertInto(f"{CATALOG}.{SILVER_DB}.silver_employee")
         )
 
     
     update_watermark(
         "silver_employee",
-        "bronze.bronze_department",
-        "silver.silver_employees",
+        "[bronze.employee_src_a, bronze.employee_src_b, bronze.employee_src_c]",
+        "silver.silver_employee",
         max_ingestion_time
     )    
 
