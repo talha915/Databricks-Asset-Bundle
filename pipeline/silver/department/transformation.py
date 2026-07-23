@@ -10,12 +10,15 @@ def transform(
 )-> DataFrame:
     return (
         df
+        .withColumn("silver_ingestion_time", F.current_timestamp())
         .select(
             F.col("Department_id").cast("int").alias("department_id"),
             F.col("Name").cast("string").alias("department_name"),
             F.col("file_path").cast("string").alias("file_path"),
-            F.col("ingestion_time").cast("timestamp").alias("ingestion_time")
+            F.col("ingestion_time").cast("timestamp").alias("bronze_ingestion_time"),
+            "silver_ingestion_time"
         )
+        
     )
 
 
@@ -35,9 +38,9 @@ def deduplicate_df(
             "department_id",
             "department_name",
             "file_path",
-            "ingestion_time"
+            "bronze_ingestion_time",
+            "silver_ingestion_time"
         )
-        .withColumnRenamed("ingestion_time", "bronze_ingestion_time")
     )
     
     return df_dedup

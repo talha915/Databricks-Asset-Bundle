@@ -9,3 +9,4 @@ employees_src_c = f"{VOLUME_PATH}/employees/sourceC"
 departments = f"{VOLUME_PATH}/department"
 
 SILVER_DB = "silver"
+GOLD_DB = "gold" 
