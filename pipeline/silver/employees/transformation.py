@@ -10,14 +10,14 @@ def get_unprocessed_bronze_df(
     df_a: DataFrame,
     df_b: DataFrame,
     df_c: DataFrame,
-    max_ingestion_time
+    last_watermark
 )-> DataFrame:
     """
     Filter unprocessed bronze rows
     """
-    unprocessed_df_emp_a = df_a.filter(F.col("ingestion_time") > max_ingestion_time)
-    unprocessed_df_emp_b = df_b.filter(F.col("ingestion_time") > max_ingestion_time)
-    unprocessed_df_emp_c = df_c.filter(F.col("ingestion_time") > max_ingestion_time)
+    unprocessed_df_emp_a = df_a.filter(F.col("ingestion_time") > last_watermark)
+    unprocessed_df_emp_b = df_b.filter(F.col("ingestion_time") > last_watermark)
+    unprocessed_df_emp_c = df_c.filter(F.col("ingestion_time") > last_watermark)
 
     return unprocessed_df_emp_a, unprocessed_df_emp_b, unprocessed_df_emp_c
 
@@ -102,6 +102,7 @@ def transform(
         .withColumn("Date_of_Birth", F.to_date("Date_of_Birth", "dd/MM/yyyy"))
         .withColumn("Date_of_Joining", F.to_date("Date_of_Joining", "dd/MM/yyyy"))
         .withColumn("End_Date", F.to_date("End_Date", "dd/MM/yyyy"))
+        .withColumn("silver_ingestion_time", F.current_timestamp())
         .select(
             F.col("Employee_id").cast("int").alias("employee_id"),
             F.col("First_Name").cast("string").alias("first_name"),
@@ -117,7 +118,8 @@ def transform(
             F.col("Currency").cast("string").alias("currency"),
             F.col("End_Date").cast("date").alias("end_date"),
             F.col("file_path").cast("string").alias("file_path"),
-            F.col("ingestion_time").cast("timestamp").alias("ingestion_time")
+            F.col("ingestion_time").cast("timestamp").alias("bronze_ingestion_time"),
+            "silver_ingestion_time"
         )
     )
 
@@ -149,9 +151,9 @@ def deduplicate_df(
             "currency",
             "end_date",
             "file_path",
-            "ingestion_time"
+            "bronze_ingestion_time",
+            "silver_ingestion_time"
         )
-        .withColumnRenamed("ingestion_time", "bronze_ingestion_time")
     )
     
     return df_dedup
