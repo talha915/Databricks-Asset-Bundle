@@ -86,26 +86,7 @@ def run():
     # Transform SCD2
     # --------------------------------
 
-    # Deduplicate by employee_id, keeping latest record
-    from pyspark.sql.window import Window
-    
-    window_spec = (
-        Window
-        .partitionBy("employee_id")
-        .orderBy(F.col("silver_ingestion_time").desc())
-    )
-    
-    df_deduplicated = (
-        df_incremental
-        .withColumn(
-            "row_num",
-            F.row_number().over(window_spec)
-        )
-        .filter(F.col("row_num") == 1)
-        .drop("row_num")
-    )
-
-    df_changes = transform(df_deduplicated)
+    df_changes = transform(df_incremental)
 
 
     # latest watermark after successful processing
