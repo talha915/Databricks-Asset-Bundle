@@ -18,7 +18,7 @@ spark = get_spark()
 def run():
 
     """
-    Silver Department -> Gold Dimension Department
+    Silver Employee -> Gold Dimension Employee
 
     Incremental SCD Type 2 load
 
@@ -36,7 +36,7 @@ def run():
 
 
     gold_table = (
-        f"{CATALOG}.{GOLD_DB}.dim_department"
+        f"{CATALOG}.{GOLD_DB}.dim_employee"
     )
 
 
@@ -44,9 +44,9 @@ def run():
     # Read Gold watermark
     # --------------------------------
 
-    max_ingestion_time = get_latest_watermark(
-        "silver.silver_department",
-        "gold.dim_department"
+    last_watermark = get_latest_watermark(
+        "silver.silver_employee",
+        "gold.dim_employee"
     )
 
 
@@ -55,7 +55,7 @@ def run():
     # --------------------------------
 
     df_silver = spark.read.table(
-        f"{CATALOG}.{SILVER_DB}.silver_department"
+        f"{CATALOG}.{SILVER_DB}.silver_employee"
     )
 
 
@@ -63,7 +63,7 @@ def run():
     # Incremental filter
     # --------------------------------
 
-    if max_ingestion_time is None:
+    if last_watermark is None:
 
         df_incremental = df_silver
 
@@ -73,7 +73,7 @@ def run():
         df_incremental = (
             df_silver
             .filter(
-                F.col("ingestion_time") > max_ingestion_time
+                F.col("silver_ingestion_time") > last_watermark
             )
         )
 
@@ -86,7 +86,36 @@ def run():
     # Transform SCD2
     # --------------------------------
 
-    df_changes = transform(df_incremental)
+    # Deduplicate by employee_id, keeping latest record
+    from pyspark.sql.window import Window
+    
+    window_spec = (
+        Window
+        .partitionBy("employee_id")
+        .orderBy(F.col("silver_ingestion_time").desc())
+    )
+    
+    df_deduplicated = (
+        df_incremental
+        .withColumn(
+            "row_num",
+            F.row_number().over(window_spec)
+        )
+        .filter(F.col("row_num") == 1)
+        .drop("row_num")
+    )
+
+    df_changes = transform(df_deduplicated)
+
+
+    # latest watermark after successful processing
+    new_watermark = (
+        df_incremental
+        .select(
+            F.max("silver_ingestion_time")
+        )
+        .first()[0]
+    )
 
 
     # --------------------------------
@@ -123,8 +152,8 @@ def run():
             .merge(
                 df_changes.alias("source"),
                 """
-                target.department_id =
-                source.department_id
+                target.employee_id =
+                source.employee_id
 
                 AND target.is_current = true
                 """
@@ -164,22 +193,9 @@ def run():
         )
 
 
-    # --------------------------------
-    # Update watermark
-    # --------------------------------
-
-    max_ingestion_time = (
-        df_incremental
-        .select(
-            F.max("ingestion_time")
-        )
-        .first()[0]
-    )
-
-
     update_watermark(
-        "gold_department",
-        "silver.silver_department",
-        "gold.dim_department",
-        max_ingestion_time
+        "gold_employee",
+        "silver.silver_employee",
+        "gold.dim_employee",
+        new_watermark
     )
