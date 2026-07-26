@@ -7,7 +7,7 @@ from framework.watermark_table import (
 from framework.quality import (
     check_columns,
     check_nulls,
-    check_employee_conflict
+    check_employee_business_key
 )
 from .transformation import (
     transform,
@@ -118,7 +118,6 @@ def run():
 
     check_columns(
         df_transform,
-        run_id,
         "silver",
         "silver_employee",
         [
@@ -132,16 +131,14 @@ def run():
 
     check_nulls(
         df_transform,
-        run_id,
         "silver",
         "silver_employee",
         "employee_id"
     )
 
 
-    check_employee_conflict(
+    check_employee_business_key(
         df_transform,
-        run_id,
         "silver",
         "silver_employee"
     )

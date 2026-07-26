@@ -1,4 +1,5 @@
 from framework.utils import get_spark
+from pyspark.sql.window import Window
 from datetime import datetime
 import pyspark.sql.functions as F
 
@@ -7,8 +8,16 @@ spark = get_spark()
 
 
 
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    StringType,
+    LongType,
+    TimestampType
+)
+
+
 def save_quality_result(
-    run_id,
     layer,
     table_name,
     check_name,
@@ -17,35 +26,33 @@ def save_quality_result(
     message=None
 ):
 
+    schema = StructType([
+        StructField("layer", StringType(), True),
+        StructField("table_name", StringType(), True),
+        StructField("check_name", StringType(), True),
+        StructField("status", StringType(), True),
+        StructField("failed_records", LongType(), True),
+        StructField("message", StringType(), True),
+        StructField("created_time", TimestampType(), True)
+    ])
+
+
     data = [
         (
-            run_id,
             layer,
             table_name,
             check_name,
             status,
-            failed_records,
+            int(failed_records),
             message,
             datetime.now()
         )
     ]
 
 
-    columns = [
-        "run_id",
-        "layer",
-        "table_name",
-        "check_name",
-        "status",
-        "failed_records",
-        "message",
-        "created_time"
-    ]
-
-
     df = spark.createDataFrame(
         data,
-        columns
+        schema=schema
     )
 
 
@@ -62,7 +69,6 @@ def save_quality_result(
 
 def check_columns(
     df,
-    run_id,
     layer,
     table_name,
     required_columns
@@ -77,8 +83,7 @@ def check_columns(
 
     if missing:
 
-        save_quality_result(
-            run_id,
+        save_quality_result( 
             layer,
             table_name,
             "schema_check",
@@ -93,7 +98,7 @@ def check_columns(
 
 
     save_quality_result(
-        run_id,
+    
         layer,
         table_name,
         "schema_check",
@@ -104,7 +109,6 @@ def check_columns(
 
 def check_nulls(
     df,
-    run_id,
     layer,
     table_name,
     column
@@ -126,7 +130,6 @@ def check_nulls(
 
 
     save_quality_result(
-        run_id,
         layer,
         table_name,
         f"{column}_null_check",
@@ -144,15 +147,14 @@ def check_nulls(
 
 def check_employee_business_key(
     df,
-    run_id,
     layer,
     table_name
 ):
 
     window = Window.partitionBy(
         "employee_id",
-        "manager_id",
-        "country"
+        "department_id",
+        "end_date"
     )
 
 
@@ -197,7 +199,6 @@ def check_employee_business_key(
 
 
     save_quality_result(
-        run_id,
         layer,
         table_name,
         "employee_business_key_check",
