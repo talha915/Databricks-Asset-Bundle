@@ -133,7 +133,7 @@ def deduplicate_df(
         bronze_df
         .join(
             silver_df,
-            on=["department_id", "employee_id"],
+            on=["department_id", "employee_id", "end_date"],
             how="left_anti"
         )
         .select(

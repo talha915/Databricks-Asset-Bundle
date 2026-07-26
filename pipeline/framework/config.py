@@ -10,3 +10,7 @@ departments = f"{VOLUME_PATH}/department"
 
 SILVER_DB = "silver"
 GOLD_DB = "gold" 
+
+SYSTEM_DB = "system"
+
+
