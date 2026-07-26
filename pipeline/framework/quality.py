@@ -1,5 +1,6 @@
 from framework.utils import get_spark
 from datetime import datetime
+import pyspark.sql.functions as F
 
 
 spark = get_spark()
@@ -91,15 +92,14 @@ def check_columns(
         )
 
 
-    else:
+    save_quality_result(
+        run_id,
+        layer,
+        table_name,
+        "schema_check",
+        "PASS"
+    )
 
-        save_quality_result(
-            run_id,
-            layer,
-            table_name,
-            "schema_check",
-            "PASS"
-        )
 
 
 def check_nulls(
@@ -112,7 +112,7 @@ def check_nulls(
 
     count = (
         df.filter(
-            df[column].isNull()
+            F.col(column).isNull()
         )
         .count()
     )
@@ -133,3 +133,90 @@ def check_nulls(
         status,
         count
     )
+
+
+    if count > 0:
+        raise Exception(
+            f"{column} contains null values"
+        )
+
+
+
+def check_employee_business_key(
+    df,
+    run_id,
+    layer,
+    table_name
+):
+
+    window = Window.partitionBy(
+        "employee_id",
+        "manager_id",
+        "country"
+    )
+
+
+    df_check = (
+        df
+        .withColumn(
+            "duplicate_count",
+            F.count("*").over(window)
+        )
+    )
+
+
+    rejected_df = (
+        df_check
+        .filter(
+            F.col("duplicate_count") > 1
+        )
+        .withColumn(
+            "reject_reason",
+            F.lit(
+                "Duplicate employee business key"
+            )
+        )
+        .drop(
+            "duplicate_count"
+        )
+    )
+
+
+    valid_df = (
+        df_check
+        .filter(
+            F.col("duplicate_count") == 1
+        )
+        .drop(
+            "duplicate_count"
+        )
+    )
+
+
+    rejected_count = rejected_df.count()
+
+
+    save_quality_result(
+        run_id,
+        layer,
+        table_name,
+        "employee_business_key_check",
+        "PASS" if rejected_count == 0 else "FAIL",
+        rejected_count,
+        "Duplicate employee_id + manager_id + country move to reject"
+    )
+
+
+    if rejected_count > 0:
+        (
+            rejected_df
+            .write
+            .format("delta")
+            .mode("append")
+            .saveAsTable(
+                "ai_lab_demo.system.rejected_rows"
+            )
+        )
+
+
+    return valid_df

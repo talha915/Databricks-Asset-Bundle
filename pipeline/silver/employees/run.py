@@ -4,13 +4,16 @@ from framework.watermark_table import (
     get_latest_watermark,
     update_watermark,
 )
-
+from framework.quality import (
+    check_columns,
+    check_nulls,
+    check_employee_conflict
+)
 from .transformation import (
     transform,
     deduplicate_df,
     get_unprocessed_bronze_df,
 )
-
 import pyspark.sql.functions as F
 
 spark = get_spark()
@@ -110,6 +113,37 @@ def run():
         unprocessed_df_emp_a,
         unprocessed_df_emp_b,
         unprocessed_df_emp_c,
+    )
+
+
+    check_columns(
+        df_transform,
+        run_id,
+        "silver",
+        "silver_employee",
+        [
+            "employee_id",
+            "first_name",
+            "manager_id",
+            "country"
+        ]
+    )
+
+
+    check_nulls(
+        df_transform,
+        run_id,
+        "silver",
+        "silver_employee",
+        "employee_id"
+    )
+
+
+    check_employee_conflict(
+        df_transform,
+        run_id,
+        "silver",
+        "silver_employee"
     )
 
     silver_table = (
